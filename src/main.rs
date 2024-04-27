@@ -2,6 +2,7 @@ use std::cmp::{max, min};
 use std::env;
 use std::fs::File;
 use std::io::{self, BufRead, Write};
+use std::ops::Mul;
 
 trait Command {
     fn inc() -> Self;
@@ -24,7 +25,7 @@ fn main() -> std::io::Result<()> {
     let max_brightness = read_brightness_file(max_brightness_file)?;
     let current_brightness = read_brightness_file(current_brightness_file)?;
     let current_brightness_percent =
-        ((current_brightness as f32 / max_brightness as f32) * 100.0) as i32;
+        ((current_brightness as f32 / max_brightness as f32).mul(100.0)).round() as i32;
     let args: Vec<String> = env::args().collect();
     if args[1].eq("-inc") {
         let mut f = File::create(file_path)?;
@@ -37,10 +38,7 @@ fn main() -> std::io::Result<()> {
         let brightness = (brightness_perc * max_brightness) / 100;
         f.write_all(brightness.to_string().as_bytes())?;
     } else if args[1].eq("-get") {
-        print!(
-            "{}",
-            ((current_brightness as f32 / max_brightness as f32) * 100.0) as i32
-        );
+        print!("{}", current_brightness_percent);
     }
     Ok(())
 }
