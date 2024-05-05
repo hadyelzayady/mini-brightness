@@ -27,18 +27,26 @@ fn main() -> std::io::Result<()> {
     let current_brightness_percent =
         ((current_brightness as f32 / max_brightness as f32).mul(100.0)).round() as i32;
     let args: Vec<String> = env::args().collect();
+    let val = match args.get(2) {
+        Some(v) => v.parse::<i32>().expect("Must enter number"),
+        None => 1,
+    };
     if args[1].eq("-inc") {
         let mut f = File::create(file_path)?;
-        let brightness_perc = min(current_brightness_percent + 1, 100);
+        let brightness_perc = min(current_brightness_percent + val, 100);
         let brightness = (brightness_perc * max_brightness) / 100;
         f.write_all(brightness.to_string().as_bytes())?;
     } else if args[1].eq("-dec") {
         let mut f = File::create(file_path)?;
-        let brightness_perc = max(current_brightness_percent - 1, 0);
+        let brightness_perc = max(current_brightness_percent - val, 0);
         let brightness = (brightness_perc * max_brightness) / 100;
         f.write_all(brightness.to_string().as_bytes())?;
     } else if args[1].eq("-get") {
         print!("{}", current_brightness_percent);
+    } else if args[1].eq("-set") {
+        let mut f = File::create(file_path)?;
+        let brightness = (val * max_brightness) / 100;
+        f.write_all(brightness.to_string().as_bytes())?;
     }
     Ok(())
 }
